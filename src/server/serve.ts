@@ -4,6 +4,7 @@ import fs, { Stats } from "fs";
 import url from "url";
 import zlib from 'zlib';
 const mime: mime = require('mime');
+const rangeParser = require('range-parser');
 const etag = require('etag');
 
 function createServe(root: string) {
@@ -18,94 +19,184 @@ function createServe(root: string) {
             if (stats?.isFile()) {
               let Etag = etag(stats);
               let lastModified = stats.mtime.toUTCString();
+              // check if client cache
               if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
                 res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                 res.setHeader('Etag', Etag);
                 res.setHeader('last-modified', lastModified);
+                res.setHeader('Accept-Ranges', 'bytes');
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.statusCode = 304;
                 res.end();
               } else {
+                // no cahce
                 res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.setHeader('Etag', Etag);
                 res.setHeader('last-modified', lastModified);
-                if (req.headers['accept-encoding']) {
-                  if (/gzip/g.test(req.headers['accept-encoding'])) {
-                    res.setHeader('Content-Encoding', 'gzip');
-                    let compress = zlib.createGzip();
-                    fs.createReadStream(realPath).pipe(compress).pipe(res);
-                  } else if (/deflate/g.test(req.headers['accept-encoding'])) {
-                    res.setHeader('Content-Encoding', 'deflate');
-                    let compress = zlib.createDeflate();
-                    fs.createReadStream(realPath).pipe(compress).pipe(res);
-                  } else if (/br/g.test(req.headers['accept-encoding'])) {
-                    res.setHeader('Content-Encoding', 'br');
-                    let compress = zlib.createBrotliCompress();
-                    fs.createReadStream(realPath).pipe(compress).pipe(res);
+                res.setHeader('Accept-Ranges', 'bytes');
+                if (/gzip/g.test(req.headers['accept-encoding'])) {
+                  // accept-encoding:gzip (default)
+                  res.setHeader('Content-Encoding', 'gzip');
+                  let compress = zlib.createGzip();
+                  // check range
+                  if (req.headers['range']) {
+                    let range = rangeParser(stats.size, req.headers['range'], { combine: true });
+                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                    res.statusCode = 206;
+                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                   } else {
-                    fs.createReadStream(realPath).pipe(res);
+                    // no range
+                    fs.createReadStream(realPath).pipe(compress).pipe(res);
+                  }
+                } else if (/deflate/g.test(req.headers['accept-encoding'])) {
+                  // accept-encoding:deflate
+                  res.setHeader('Content-Encoding', 'deflate');
+                  let compress = zlib.createDeflate();
+                  // check range
+                  if (req.headers['range']) {
+                    let range = rangeParser(stats.size, req.headers['range'], { combine: true });
+                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                    res.statusCode = 206;
+                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                  } else {
+                    // no range
+                    fs.createReadStream(realPath).pipe(compress).pipe(res);
+                  }
+                } else if (/br/g.test(req.headers['accept-encoding'])) {
+                  // accept-encoding:br
+                  res.setHeader('Content-Encoding', 'br');
+                  let compress = zlib.createBrotliCompress();
+                  // check range
+                  if (req.headers['range']) {
+                    let range = rangeParser(stats.size, req.headers['range'], { combine: true });
+                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                    res.statusCode = 206;
+                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                  } else {
+                    // no range
+                    fs.createReadStream(realPath).pipe(compress).pipe(res);
                   }
                 } else {
-                  fs.createReadStream(realPath).pipe(res);
+                  // no support accept-encoding
+                  // check range
+                  if (req.headers['range']) {
+                    let range = rangeParser(stats.size, req.headers['range'], { combine: true });
+                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                    res.statusCode = 206;
+                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
+                  } else {
+                    // no range
+                    fs.createReadStream(realPath).pipe(res);
+                  }
                 }
               }
             } else {
               if (/\/$/.test(pathname!)) {
+                // try index.html
                 realPath = path.resolve(path.normalize(path.join(realPath, 'index.html')));
                 fs.stat(realPath, (err: Error | null, stats?: Stats) => {
                   if (!err) {
                     let Etag = etag(stats);
                     let lastModified = stats!.mtime.toUTCString();
+                    // check if client cache
                     if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
                       res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                       res.setHeader('Etag', Etag);
                       res.setHeader('last-modified', lastModified);
+                      res.setHeader('Accept-Ranges', 'bytes');
                       res.setHeader('Vary', 'Accept-Encoding');
                       res.statusCode = 304;
                       res.end();
                     } else {
+                      // no cache
                       res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                       res.setHeader('Vary', 'Accept-Encoding');
                       res.setHeader('Etag', Etag);
                       res.setHeader('last-modified', lastModified);
+                      res.setHeader('Accept-Ranges', 'bytes');
                       if (/gzip/g.test(req.headers['accept-encoding'])) {
+                        // accept-encoding:gzip (default)
                         res.setHeader('Content-Encoding', 'gzip');
                         let compress = zlib.createGzip();
-                        fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        // check range
+                        if (req.headers['range']) {
+                          let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
+                          res.statusCode = 206;
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                        } else {
+                          // no range
+                          fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        }
                       } else if (/deflate/g.test(req.headers['accept-encoding'])) {
+                        // accept-encoding:deflate
                         res.setHeader('Content-Encoding', 'deflate');
                         let compress = zlib.createDeflate();
-                        fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        // check range
+                        if (req.headers['range']) {
+                          let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
+                          res.statusCode = 206;
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                        } else {
+                          // no range
+                          fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        }
                       } else if (/br/g.test(req.headers['accept-encoding'])) {
+                        // accept-encoding:br
                         res.setHeader('Content-Encoding', 'br');
                         let compress = zlib.createBrotliCompress();
-                        fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        // check range
+                        if (req.headers['range']) {
+                          let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
+                          res.statusCode = 206;
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                        } else {
+                          // no range
+                          fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        }
                       } else {
-                        fs.createReadStream(realPath).pipe(res);
+                        // not support accept-encoding 
+                        // check range
+                        if (req.headers['range']) {
+                          let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
+                          res.statusCode = 206;
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
+                        } else {
+                          // no range
+                          fs.createReadStream(realPath).pipe(res);
+                        }
                       }
                     }
                   } else {
+                    // index.html file not found
                     res.statusCode = 404;
                     res.end();
                   }
                 })
               } else {
+                // redirect to folder
                 res.setHeader('Location', `${pathname}/${search ? search : ''}`);
                 res.statusCode = 301;
                 res.end();
               }
             }
           } else {
+            // file not found
             res.statusCode = 404;
             res.end();
           }
         })
       } else {
+        // request file not in the root
         res.statusCode = 403;
         res.end();
       }
     } else if (req.method === 'HEAD') {
+      // request method HEAD
       let pathname = url.parse(req.url).pathname;
       let search = url.parse(req.url).search;
       let realPath = path.resolve(path.normalize(path.join(root, pathname!)));
@@ -115,88 +206,106 @@ function createServe(root: string) {
             if (stats?.isFile()) {
               let Etag = etag(stats);
               let lastModified = stats.mtime.toUTCString();
+              // check if client cache
               if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
                 res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                 res.setHeader('Etag', Etag);
                 res.setHeader('last-modified', lastModified);
+                res.setHeader('Accept-Ranges', 'bytes');
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.statusCode = 304;
                 res.end();
               } else {
+                // no cache
                 res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.setHeader('Etag', Etag);
                 res.setHeader('last-modified', lastModified);
-                if (req.headers['accept-encoding']) {
-                  if (/gzip/g.test(req.headers['accept-encoding'])) {
-                    res.setHeader('Content-Encoding', 'gzip');
-                    res.end();
-                  } else if (/deflate/g.test(req.headers['accept-encoding'])) {
-                    res.setHeader('Content-Encoding', 'deflate');
-                    res.end();
-                  } else if (/br/g.test(req.headers['accept-encoding'])) {
-                    res.setHeader('Content-Encoding', 'br');
-                    res.end();
-                  } else {
-                    res.end();
-                  }
+                res.setHeader('Accept-Ranges', 'bytes');
+                if (/gzip/g.test(req.headers['accept-encoding'])) {
+                  // accept-encoding:gzip (default)
+                  res.setHeader('Content-Encoding', 'gzip');
+                  res.end();
+                } else if (/deflate/g.test(req.headers['accept-encoding'])) {
+                  // accept-encoding:deflate
+                  res.setHeader('Content-Encoding', 'deflate');
+                  res.end();
+                } else if (/br/g.test(req.headers['accept-encoding'])) {
+                  // accept-encoding:br
+                  res.setHeader('Content-Encoding', 'br');
+                  res.end();
                 } else {
+                  // not support accept-encoding
                   res.end();
                 }
               }
             } else {
               if (/\/$/.test(pathname!)) {
+                // try index.html
                 realPath = path.resolve(path.normalize(path.join(realPath, 'index.html')));
                 fs.stat(realPath, (err: Error | null, stats?: Stats) => {
                   if (!err) {
                     let Etag = etag(stats);
                     let lastModified = stats!.mtime.toUTCString();
+                    // check if client cache
                     if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
                       res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                       res.setHeader('Etag', Etag);
                       res.setHeader('last-modified', lastModified);
+                      res.setHeader('Accept-Ranges', 'bytes');
                       res.setHeader('Vary', 'Accept-Encoding');
                       res.statusCode = 304;
                       res.end();
                     } else {
+                      // no cache
                       res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                       res.setHeader('Vary', 'Accept-Encoding');
                       res.setHeader('Etag', Etag);
                       res.setHeader('last-modified', lastModified);
+                      res.setHeader('Accept-Ranges', 'bytes');
                       if (/gzip/g.test(req.headers['accept-encoding'])) {
+                        // accept-encoding:gzip (default)
                         res.setHeader('Content-Encoding', 'gzip');
                         res.end();
                       } else if (/deflate/g.test(req.headers['accept-encoding'])) {
+                        // accept-encoding:deflate
                         res.setHeader('Content-Encoding', 'deflate');
                         res.end();
                       } else if (/br/g.test(req.headers['accept-encoding'])) {
+                        // accept-encoding:br
                         res.setHeader('Content-Encoding', 'br');
                         res.end();
                       } else {
+                        // client not support accept-encoding
                         res.end();
                       }
                     }
                   } else {
+                    // index.html file not found
                     res.statusCode = 404;
                     res.end();
                   }
                 })
               } else {
+                // redirect to folder
                 res.setHeader('Location', `${pathname}/${search ? search : ''}`);
                 res.statusCode = 301;
                 res.end();
               }
             }
           } else {
+            // file not found
             res.statusCode = 404;
             res.end();
           }
         })
       } else {
+        // request file not in the root
         res.statusCode = 403;
         res.end();
       }
     } else {
+      // method not support
       res.statusCode = 400;
       res.end();
     }
