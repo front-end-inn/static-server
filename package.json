@@ -26,7 +26,10 @@
   },
   "homepage": "https://github.com/front-end-inn/static-server#readme",
   "dependencies": {
+    "@types/etag": "^1.8.0",
+    "@types/mime": "^2.0.3",
     "@types/node": "^14.0.27",
+    "@types/range-parser": "^1.2.3",
     "etag": "^1.8.1",
     "mime": "^2.4.6",
     "range-parser": "^1.2.1",

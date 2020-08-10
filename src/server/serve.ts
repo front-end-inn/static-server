@@ -1,11 +1,11 @@
 import { ServerResponse } from "http";
+import mime from "mime";
 import path from "path";
 import fs, { Stats } from "fs";
 import url from "url";
-import zlib from 'zlib';
-const mime: mime = require('mime');
-const rangeParser = require('range-parser');
-const etag = require('etag');
+import zlib from "zlib";
+import rangeParser from "range-parser";
+import etag from "etag";
 
 function createServe(root: string) {
   return function (req: Request, res: ServerResponse) {
@@ -97,7 +97,7 @@ function createServe(root: string) {
                 realPath = path.resolve(path.normalize(path.join(realPath, 'index.html')));
                 fs.stat(realPath, (err: Error | null, stats?: Stats) => {
                   if (!err) {
-                    let Etag = etag(stats);
+                    let Etag = etag(stats!);
                     let lastModified = stats!.mtime.toUTCString();
                     // check if client cache
                     if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
@@ -245,7 +245,7 @@ function createServe(root: string) {
                 realPath = path.resolve(path.normalize(path.join(realPath, 'index.html')));
                 fs.stat(realPath, (err: Error | null, stats?: Stats) => {
                   if (!err) {
-                    let Etag = etag(stats);
+                    let Etag = etag(stats!);
                     let lastModified = stats!.mtime.toUTCString();
                     // check if client cache
                     if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
