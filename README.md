@@ -14,5 +14,4 @@ npm install
 ### first `npm run build` or `yarn build` then copy the `public` folder in `src/test` to `dist/src/test`,and `yarn test` or `npm run test`,now you can visit [http://localhost/](http://localhost/),and you can see the hello world on the screen
 # TODO
 - ~~support http range~~ done!
-- cross domain
 - mapping path
