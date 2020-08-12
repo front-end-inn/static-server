@@ -21,15 +21,12 @@ function createServe(root: string) {
               let lastModified = stats.mtime.toUTCString();
               // check if client cache
               if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
-                res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
-                res.setHeader('Etag', Etag);
-                res.setHeader('last-modified', lastModified);
                 res.setHeader('Accept-Ranges', 'bytes');
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.statusCode = 304;
                 res.end();
               } else {
-                // no cahce
+                // no cache
                 res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.setHeader('Etag', Etag);
@@ -42,9 +39,30 @@ function createServe(root: string) {
                   // check range
                   if (req.headers['range']) {
                     let range = rangeParser(stats.size, req.headers['range'], { combine: true });
-                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
-                    res.statusCode = 206;
-                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                    if (range < 0) {
+                      res.setHeader('Content-Range', `bytes */${stats.size}`);
+                      res.statusCode = 416;
+                      res.end();
+                    } else {
+                      if (req.headers['if-range']) {
+                        // check client cache
+                        if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
+                          // cache hit
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                          res.statusCode = 206;
+                          res.end();
+                        } else {
+                          // file update
+                          res.statusCode = 200;
+                          fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        }
+                      } else {
+                        // no cache
+                        res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                        res.statusCode = 206;
+                        fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                      }
+                    }
                   } else {
                     // no range
                     fs.createReadStream(realPath).pipe(compress).pipe(res);
@@ -56,9 +74,31 @@ function createServe(root: string) {
                   // check range
                   if (req.headers['range']) {
                     let range = rangeParser(stats.size, req.headers['range'], { combine: true });
-                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
-                    res.statusCode = 206;
-                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                    if (range < 0) {
+                      // range fail
+                      res.setHeader('Content-Range', `bytes */${stats.size}`);
+                      res.statusCode = 416;
+                      res.end();
+                    } else {
+                      if (req.headers['if-range']) {
+                        // check client range
+                        if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
+                          // cache hit
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                          res.statusCode = 206;
+                          res.end();
+                        } else {
+                          // file update
+                          res.statusCode = 200;
+                          fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        }
+                      } else {
+                        // no cache
+                        res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                        res.statusCode = 206;
+                        fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                      }
+                    }
                   } else {
                     // no range
                     fs.createReadStream(realPath).pipe(compress).pipe(res);
@@ -70,9 +110,31 @@ function createServe(root: string) {
                   // check range
                   if (req.headers['range']) {
                     let range = rangeParser(stats.size, req.headers['range'], { combine: true });
-                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
-                    res.statusCode = 206;
-                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                    if (range < 0) {
+                      // range fail
+                      res.setHeader('Content-Range', `bytes */${stats.size}`);
+                      res.statusCode = 416;
+                      res.end();
+                    } else {
+                      if (req.headers['if-range']) {
+                        // check client cache
+                        if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
+                          // cache hit
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                          res.statusCode = 206;
+                          res.end();
+                        } else {
+                          // file update
+                          res.statusCode = 200;
+                          fs.createReadStream(realPath).pipe(compress).pipe(res);
+                        }
+                      } else {
+                        // no cache
+                        res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                        res.statusCode = 206;
+                        fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
+                      }
+                    }
                   } else {
                     // no range
                     fs.createReadStream(realPath).pipe(compress).pipe(res);
@@ -80,11 +142,34 @@ function createServe(root: string) {
                 } else {
                   // no support accept-encoding
                   // check range
+                  // bug this !!!!!!
                   if (req.headers['range']) {
                     let range = rangeParser(stats.size, req.headers['range'], { combine: true });
-                    res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
-                    res.statusCode = 206;
-                    fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
+                    if (range < 0) {
+                      // range fail
+                      res.setHeader('Content-Range', `bytes */${stats.size}`);
+                      res.statusCode = 416;
+                      res.end();
+                    } else {
+                      if (req.headers['if-range']) {
+                        // check client cache
+                        if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
+                          // cache hit
+                          res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                          res.statusCode = 206;
+                          res.end();
+                        }else{
+                          // file update
+                          res.statusCode = 200;
+                          fs.createReadStream(realPath).pipe(res);
+                        }
+                      } else {
+                        // no cache
+                        res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
+                        res.statusCode = 206;
+                        fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
+                      }
+                    }
                   } else {
                     // no range
                     fs.createReadStream(realPath).pipe(res);
@@ -101,9 +186,6 @@ function createServe(root: string) {
                     let lastModified = stats!.mtime.toUTCString();
                     // check if client cache
                     if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
-                      res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
-                      res.setHeader('Etag', Etag);
-                      res.setHeader('last-modified', lastModified);
                       res.setHeader('Accept-Ranges', 'bytes');
                       res.setHeader('Vary', 'Accept-Encoding');
                       res.statusCode = 304;
@@ -208,9 +290,6 @@ function createServe(root: string) {
               let lastModified = stats.mtime.toUTCString();
               // check if client cache
               if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
-                res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
-                res.setHeader('Etag', Etag);
-                res.setHeader('last-modified', lastModified);
                 res.setHeader('Accept-Ranges', 'bytes');
                 res.setHeader('Vary', 'Accept-Encoding');
                 res.statusCode = 304;
@@ -249,9 +328,6 @@ function createServe(root: string) {
                     let lastModified = stats!.mtime.toUTCString();
                     // check if client cache
                     if (req.headers['if-modified-since'] === lastModified && req.headers['if-none-match'] === Etag) {
-                      res.setHeader('Content-Type', `${mime.getType(realPath)}; charset=utf-8`);
-                      res.setHeader('Etag', Etag);
-                      res.setHeader('last-modified', lastModified);
                       res.setHeader('Accept-Ranges', 'bytes');
                       res.setHeader('Vary', 'Accept-Encoding');
                       res.statusCode = 304;
