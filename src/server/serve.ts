@@ -142,7 +142,6 @@ function createServe(root: string) {
                 } else {
                   // no support accept-encoding
                   // check range
-                  // bug this !!!!!!
                   if (req.headers['range']) {
                     let range = rangeParser(stats.size, req.headers['range'], { combine: true });
                     if (range < 0) {
