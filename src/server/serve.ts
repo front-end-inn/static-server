@@ -50,7 +50,7 @@ function createServe(root: string) {
                           // cache hit
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
-                          res.end();
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                         } else {
                           // file update
                           res.statusCode = 200;
@@ -86,7 +86,7 @@ function createServe(root: string) {
                           // cache hit
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
-                          res.end();
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                         } else {
                           // file update
                           res.statusCode = 200;
@@ -122,7 +122,7 @@ function createServe(root: string) {
                           // cache hit
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
-                          res.end();
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                         } else {
                           // file update
                           res.statusCode = 200;
@@ -156,7 +156,7 @@ function createServe(root: string) {
                           // cache hit
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
-                          res.end();
+                          fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
                         }else{
                           // file update
                           res.statusCode = 200;
@@ -269,7 +269,7 @@ function createServe(root: string) {
                                 // cache hit
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
-                                res.end();
+                                fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                               } else {
                                 // file update
                                 res.statusCode = 200;
@@ -305,7 +305,7 @@ function createServe(root: string) {
                                 // cache hit
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
-                                res.end();
+                                fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                               } else {
                                 // file update
                                 res.statusCode = 200;
@@ -341,7 +341,7 @@ function createServe(root: string) {
                                 // cache hit
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
-                                res.end();
+                                fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
                               } else {
                                 // file update
                                 res.statusCode = 200;
@@ -375,7 +375,7 @@ function createServe(root: string) {
                                 // cache hit
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
-                                res.end();
+                                fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
                               }else{
                                 // file update
                                 res.statusCode = 200;
