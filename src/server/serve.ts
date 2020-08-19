@@ -196,61 +196,6 @@ function createServe(root: string) {
                       res.setHeader('Etag', Etag);
                       res.setHeader('last-modified', lastModified);
                       res.setHeader('Accept-Ranges', 'bytes');
-                      // if (/gzip/g.test(req.headers['accept-encoding'])) {
-                      //   // accept-encoding:gzip (default)
-                      //   res.setHeader('Content-Encoding', 'gzip');
-                      //   let compress = zlib.createGzip();
-                      //   // check range
-                      //   if (req.headers['range']) {
-                      //     let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
-                      //     res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
-                      //     res.statusCode = 206;
-                      //     fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
-                      //   } else {
-                      //     // no range
-                      //     fs.createReadStream(realPath).pipe(compress).pipe(res);
-                      //   }
-                      // } else if (/deflate/g.test(req.headers['accept-encoding'])) {
-                      //   // accept-encoding:deflate
-                      //   res.setHeader('Content-Encoding', 'deflate');
-                      //   let compress = zlib.createDeflate();
-                      //   // check range
-                      //   if (req.headers['range']) {
-                      //     let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
-                      //     res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
-                      //     res.statusCode = 206;
-                      //     fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
-                      //   } else {
-                      //     // no range
-                      //     fs.createReadStream(realPath).pipe(compress).pipe(res);
-                      //   }
-                      // } else if (/br/g.test(req.headers['accept-encoding'])) {
-                      //   // accept-encoding:br
-                      //   res.setHeader('Content-Encoding', 'br');
-                      //   let compress = zlib.createBrotliCompress();
-                      //   // check range
-                      //   if (req.headers['range']) {
-                      //     let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
-                      //     res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
-                      //     res.statusCode = 206;
-                      //     fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
-                      //   } else {
-                      //     // no range
-                      //     fs.createReadStream(realPath).pipe(compress).pipe(res);
-                      //   }
-                      // } else {
-                      //   // not support accept-encoding 
-                      //   // check range
-                      //   if (req.headers['range']) {
-                      //     let range = rangeParser(stats!.size, req.headers['range'], { combine: true });
-                      //     res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
-                      //     res.statusCode = 206;
-                      //     fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
-                      //   } else {
-                      //     // no range
-                      //     fs.createReadStream(realPath).pipe(res);
-                      //   }
-                      // }
                       if (/gzip/g.test(req.headers['accept-encoding'])) {
                         // accept-encoding:gzip (default)
                         res.setHeader('Content-Encoding', 'gzip');
