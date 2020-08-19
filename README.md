@@ -63,5 +63,5 @@ Percentage of the requests served within a certain time (ms)
  100%  16126 (longest request)
 ```
 # TODO
-- ~~support http range~~ done!
+- ~~support http range~~
 - mapping path
