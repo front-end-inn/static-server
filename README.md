@@ -64,4 +64,4 @@ Percentage of the requests served within a certain time (ms)
 ```
 # TODO
 - ~~support http range~~
-- mapping path
+- cli
