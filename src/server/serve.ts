@@ -47,7 +47,7 @@ function createServe(root: string) {
                       if (req.headers['if-range']) {
                         // check client cache
                         if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                          // cache hit
+                          // file not modified
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
                           fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -57,7 +57,7 @@ function createServe(root: string) {
                           fs.createReadStream(realPath).pipe(compress).pipe(res);
                         }
                       } else {
-                        // no cache
+                        // no if-range
                         res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                         res.statusCode = 206;
                         fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -83,7 +83,7 @@ function createServe(root: string) {
                       if (req.headers['if-range']) {
                         // check client range
                         if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                          // cache hit
+                          // file not modified
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
                           fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -93,7 +93,7 @@ function createServe(root: string) {
                           fs.createReadStream(realPath).pipe(compress).pipe(res);
                         }
                       } else {
-                        // no cache
+                        // no if-range
                         res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                         res.statusCode = 206;
                         fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -119,7 +119,7 @@ function createServe(root: string) {
                       if (req.headers['if-range']) {
                         // check client cache
                         if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                          // cache hit
+                          // file not modified
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
                           fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -129,7 +129,7 @@ function createServe(root: string) {
                           fs.createReadStream(realPath).pipe(compress).pipe(res);
                         }
                       } else {
-                        // no cache
+                        // no if-range
                         res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                         res.statusCode = 206;
                         fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -153,7 +153,7 @@ function createServe(root: string) {
                       if (req.headers['if-range']) {
                         // check client cache
                         if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                          // cache hit
+                          // file not modified
                           res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                           res.statusCode = 206;
                           fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
@@ -163,7 +163,7 @@ function createServe(root: string) {
                           fs.createReadStream(realPath).pipe(res);
                         }
                       } else {
-                        // no cache
+                        // no if-range
                         res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats.size}`)
                         res.statusCode = 206;
                         fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
@@ -211,7 +211,7 @@ function createServe(root: string) {
                             if (req.headers['if-range']) {
                               // check client cache
                               if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                                // cache hit
+                                // file not modified
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
                                 fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -221,7 +221,7 @@ function createServe(root: string) {
                                 fs.createReadStream(realPath).pipe(compress).pipe(res);
                               }
                             } else {
-                              // no cache
+                              // no if-range
                               res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                               res.statusCode = 206;
                               fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -247,7 +247,7 @@ function createServe(root: string) {
                             if (req.headers['if-range']) {
                               // check client range
                               if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                                // cache hit
+                                // file not modified
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
                                 fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -257,7 +257,7 @@ function createServe(root: string) {
                                 fs.createReadStream(realPath).pipe(compress).pipe(res);
                               }
                             } else {
-                              // no cache
+                              // no if-range
                               res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                               res.statusCode = 206;
                               fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -283,7 +283,7 @@ function createServe(root: string) {
                             if (req.headers['if-range']) {
                               // check client cache
                               if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                                // cache hit
+                                // file not modified
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
                                 fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -293,7 +293,7 @@ function createServe(root: string) {
                                 fs.createReadStream(realPath).pipe(compress).pipe(res);
                               }
                             } else {
-                              // no cache
+                              // no if-range
                               res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                               res.statusCode = 206;
                               fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(compress).pipe(res);
@@ -317,7 +317,7 @@ function createServe(root: string) {
                             if (req.headers['if-range']) {
                               // check client cache
                               if (req.headers['if-range'] === Etag || req.headers['if-range'] === lastModified) {
-                                // cache hit
+                                // file not modified
                                 res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                                 res.statusCode = 206;
                                 fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
@@ -327,7 +327,7 @@ function createServe(root: string) {
                                 fs.createReadStream(realPath).pipe(res);
                               }
                             } else {
-                              // no cache
+                              // no if-range
                               res.setHeader('Content-Range', `bytes ${range[0].start}-${range[0].end}/${stats!.size}`)
                               res.statusCode = 206;
                               fs.createReadStream(realPath, { start: range[0].start, end: range[0].end }).pipe(res);
