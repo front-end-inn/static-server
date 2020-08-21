@@ -2,7 +2,7 @@ import { ServerResponse } from "http";
 import mime from "mime";
 import path from "path";
 import fs, { Stats } from "fs";
-import url from "url";
+import url, { Url } from "url";
 import zlib from "zlib";
 import rangeParser from "range-parser";
 import etag from "etag";
@@ -10,8 +10,9 @@ import etag from "etag";
 function createServe(root: string) {
   return function (req: Request, res: ServerResponse) {
     if (req.method === 'GET') {
-      let pathname = decodeURI(url.parse(req.url).pathname!);
-      let search = url.parse(req.url).search;
+      let parseUrl:Url = url.parse(req.url);
+      let pathname = decodeURI(parseUrl.pathname!);
+      let search = parseUrl.search;
       let realPath = path.resolve(path.normalize(path.join(root, pathname!)));
       if (~realPath.indexOf(root)) {
         fs.stat(realPath, (err: Error | null, stats?: Stats) => {
