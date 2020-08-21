@@ -10,7 +10,7 @@ import etag from "etag";
 function createServe(root: string) {
   return function (req: Request, res: ServerResponse) {
     if (req.method === 'GET') {
-      let pathname = url.parse(req.url).pathname;
+      let pathname = decodeURI(url.parse(req.url).pathname!);
       let search = url.parse(req.url).search;
       let realPath = path.resolve(path.normalize(path.join(root, pathname!)));
       if (~realPath.indexOf(root)) {
