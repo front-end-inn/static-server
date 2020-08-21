@@ -15,7 +15,7 @@ npm install
 - head request
 - Etag+last modified
 # test
-### first `npm run build` or `yarn build` then copy the `public` folder in `src/test` to `dist/src/test`,and `yarn test` or `npm run test`,now you can visit [http://localhost/](http://localhost:2333/),and you can see the hello world on the screen
+### first `npm run build` or `yarn build` then copy the `public` folder in `src/test` to `dist/src/test`,and `yarn test` or `npm run test`,now you can visit [http://localhost:2333/](http://localhost:2333/),and you can see the hello world on the screen
 ### benchmark results is in the `benchmark` folder
 ```
 This is ApacheBench, Version 2.3 <$Revision: 1430300 $>
