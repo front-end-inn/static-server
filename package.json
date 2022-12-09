@@ -28,7 +28,7 @@
   "dependencies": {
     "@types/etag": "^1.8.1",
     "@types/mime": "^2.0.3",
-    "@types/node": "^17.0.0",
+    "@types/node": "^18.11.12",
     "@types/range-parser": "^1.2.4",
     "etag": "^1.8.1",
     "mime": "^3.0.0",
